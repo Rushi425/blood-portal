@@ -1,21 +1,33 @@
+const http = require('http');
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
+const cookieParser = require('cookie-parser'); // Added cookie-parser import
 require('dotenv').config();
 
 const app = express();
+const connectDB = require('./config/db.js');
 
 // Middleware
-app.use(cors());
+app.use(cors({ origin: 'http://localhost:5173', credentials: true })); 
 app.use(express.json());
+app.use(cookieParser()); 
 
+// // API routes
+const authRoutes = require('./routes/authRoutes.js');
+const donorRoutes = require('./routes/donorRoutes.js');
+const statsRoutes = require('./routes/stats.js'); 
 
-// Connect to MongoDB
-mongoose.connect(process.env.DB_CONNECT)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('MongoDB connection error:', err));
+app.use('/api/v1', authRoutes);
+app.use('/api/v1', donorRoutes);
+app.use('/api/v1', statsRoutes); 
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+const port = process.env.PORT || 3000;
+const server = http.createServer(app);
+
+connectDB().then(() => {
+    server.listen(port, () => {
+        console.log(`Server running on http://localhost:${port}`);
+    });
+}).catch((err) => {
+    console.error('Failed to connect to the database:', err);
 });

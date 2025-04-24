@@ -1,14 +1,25 @@
-// filepath: /backend/src/routes/authRoutes.js
 const express = require('express');
-const { register, login } = require('../controller/authController');
-const { verifyToken } = require('../middleware/auth');
+const { loginUser, logoutUser, registerUser } = require('../controller/userController.js');
+const { getBloodBanks, addBloodBank } = require('../controller/bloodBankController.js');
+const { getBloodGroupStatistics } = require('../controller/getBloodStatsController.js');
+const { sendContactEmail } = require('../controller/contactController.js');
 
 const router = express.Router();
 
-router.post('/register', register);
-router.post('/login', login);
-router.get('/profile', verifyToken, (req, res) => {
-    res.status(200).json({ message: 'Profile data', user: req.user });
-});
+// User registration and login routes
+router.post('/register', registerUser);
+router.post('/login', loginUser);
+router.post('/logout', logoutUser);
+
+// Blood bank routes
+router.post('/bloodbank', addBloodBank);
+router.get('/bloodbanks', getBloodBanks);
+
+
+// Send contact email
+router.post('/contact', sendContactEmail);
+
+// Statistics route
+router.get('/statistics/blood-groups', getBloodGroupStatistics);
 
 module.exports = router;
