@@ -12,6 +12,7 @@ import AboutUs from "./pages/AboutUs";
 import ContactUs from "./pages/ContactUs";
 import SearchBlood from "./pages/SearchBlood";
 import AddBloodBank from "./pages/AddBloodBank";
+import BookAppointment from './components/BookAppointment';
 
 function App() {
   return (
@@ -28,6 +29,8 @@ function App() {
         <Route path="/contact-us" element={<ContactUs />} />
         <Route path="/find-blood" element={<SearchBlood />} />
         <Route path="/add-bloodbank" element={<AddBloodBank />} />
+        <Route path="/book-appointment/:bloodBankId" element={<BookAppointment />} />
+
       </Routes>
       <Footer />
     </>
