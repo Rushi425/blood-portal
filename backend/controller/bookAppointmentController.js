@@ -22,8 +22,10 @@ const bookAppointment = async (req, res) => {
     bloodBank.appointments.push({ userId, date, time });
     await bloodBank.save();
 
-    // Send email to blood bank
+    // Fetch user details
     const user = await User.findById(userId);
+
+    // Configure email transporter
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -32,19 +34,33 @@ const bookAppointment = async (req, res) => {
       },
     });
 
+    // Email content with all user information
     const mailOptions = {
       from: `"RedLink" <${process.env.EMAIL_USER}>`,
       to: bloodBank.contact.email,
       subject: 'New Appointment Booking',
       html: `
         <h3>New Appointment Booking</h3>
-        <p><strong>User:</strong> ${user.fullName}</p>
-        <p><strong>Email:</strong> ${user.email}</p>
-        <p><strong>Date:</strong> ${date}</p>
-        <p><strong>Time:</strong> ${time}</p>
+        <p><strong>User Details:</strong></p>
+        <ul>
+          <li><strong>Name:</strong> ${user.fullName}</li>
+          <li><strong>Email:</strong> ${user.email}</li>
+          <li><strong>Phone:</strong> ${user.phone}</li>
+          <li><strong>Gender:</strong> ${user.gender}</li>
+          <li><strong>Blood Group:</strong> ${user.bloodGroup}</li>
+          <li><strong>City:</strong> ${user.city}</li>
+          <li><strong>State:</strong> ${user.state}</li>
+          <li><strong>Pincode:</strong> ${user.pincode}</li>
+        </ul>
+        <p><strong>Appointment Details:</strong></p>
+        <ul>
+          <li><strong>Date:</strong> ${date}</li>
+          <li><strong>Time:</strong> ${time}</li>
+        </ul>
       `,
     };
 
+    // Send email
     await transporter.sendMail(mailOptions);
 
     res.status(201).json({ message: 'Appointment booked successfully' });

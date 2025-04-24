@@ -8,6 +8,7 @@ const BookAppointment = () => {
   const [formData, setFormData] = useState({ date: '', time: '' });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [buttonState, setButtonState] = useState('Book Appointment'); // Button state
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -16,12 +17,15 @@ const BookAppointment = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setButtonState('Booking...'); // Update button state to "Booking..."
     try {
       const response = await API.post('/book-appointment', { bloodBankId, ...formData });
       setSuccess('Appointment booked successfully!');
+      setButtonState('Appointment Booked'); 
       setTimeout(() => navigate('/blood-banks'), 2000);
     } catch (error) {
       setError(error.response?.data?.error || 'Failed to book appointment');
+      setButtonState('Book Appointment'); // Reset button state on error
     }
   };
 
@@ -49,12 +53,18 @@ const BookAppointment = () => {
           className="w-full p-2 border rounded mb-4"
           required
         />
-        <button type="submit" className="w-full bg-red-600 text-white p-2 rounded">
-          Book Appointment
+        <button
+          type="submit"
+          className={`w-full p-2 rounded ${
+            buttonState === 'Booking...' ? 'bg-gray-400' : 'bg-red-600 text-white'
+          }`}
+          disabled={buttonState === 'Booking...'} // Disable button during booking
+        >
+          {buttonState}
         </button>
       </form>
     </div>
   );
 };
 
-export default BookAppointment;
+export default BookAppointment;   
