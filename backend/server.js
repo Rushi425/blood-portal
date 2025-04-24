@@ -16,10 +16,11 @@ app.use(cookieParser());
 const authRoutes = require('./routes/authRoutes.js');
 const donorRoutes = require('./routes/donorRoutes.js');
 const statsRoutes = require('./routes/stats.js'); 
-
+const adminRoutes = require('./routes/adminRoutes.js'); // Added adminRoutes
 app.use('/api/v1', authRoutes);
 app.use('/api/v1', donorRoutes);
 app.use('/api/v1', statsRoutes); 
+app.use('/api/v1', adminRoutes); 
 
 const port = process.env.PORT || 3000;
 const server = http.createServer(app);

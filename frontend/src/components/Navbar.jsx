@@ -1,10 +1,11 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import React, { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 
 const Navbar = () => {
   const { isAuthenticated, logout } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -12,20 +13,38 @@ const Navbar = () => {
     navigate('/');
   };
 
-  const navLinks = isAuthenticated ? [
-    { to: "/donor-home", text: "Dashboard" },
-    { to: "/blood-banks", text: "Blood Banks" },
-    { to: "/find-blood", text: "Find Blood" },
-    { to: "/about-us", text: "About Us" },
-    { to: "/contact-us", text: "Contact Us" },
-  ] : [
-    { to: "/", text: "Home" },
-    { to: "/blood-banks", text: "Blood Banks" },
-    { to: "/find-blood", text: "Find Blood" },
-    { to: "/about-us", text: "About Us" },
-    { to: "/contact-us", text: "Contact Us" },
-    { to: "/donor-login", text: "Login" },
-  ];
+  const handleAdminLogout = () => {
+    localStorage.removeItem('adminToken');
+    navigate('/');
+  };
+
+  const isHomePage = location.pathname === "/";
+  const isAdminPage = location.pathname === "/admin/home";
+
+  const isDonorOrAdminLogin =
+    location.pathname === "/donor-login" ||
+    location.pathname === "/donor-register" ||
+    location.pathname === "/admin/login";
+
+  const navLinks = isDonorOrAdminLogin
+    ? [{ to: "/", text: "Home" }]
+    : isAdminPage
+      ? []
+      : isAuthenticated
+        ? [
+            { to: "/donor-home", text: "Dashboard" },
+            { to: "/blood-banks", text: "Blood Banks" },
+            { to: "/find-blood", text: "Find Blood" },
+            { to: "/about-us", text: "About Us" },
+            { to: "/contact-us", text: "Contact Us" },
+          ]
+        : [
+            { to: "/", text: "Home" },
+            { to: "/blood-banks", text: "Blood Banks" },
+            { to: "/find-blood", text: "Find Blood" },
+            { to: "/about-us", text: "About Us" },
+            { to: "/contact-us", text: "Contact Us" },
+          ];
 
   return (
     <nav className="bg-red-600 text-white shadow-md">
@@ -38,7 +57,6 @@ const Navbar = () => {
             Red<span className="text-yellow-300">Link</span>
           </Link>
 
-          {/* Hamburger Icon */}
           <button
             className="md:hidden text-white text-2xl focus:outline-none"
             onClick={() => setIsOpen(!isOpen)}
@@ -46,7 +64,6 @@ const Navbar = () => {
             {isOpen ? "✕" : "☰"}
           </button>
 
-          {/* Desktop Navigation */}
           <ul className="hidden md:flex space-x-6 items-center">
             {navLinks.map((link, index) => (
               <li key={index}>
@@ -58,7 +75,37 @@ const Navbar = () => {
                 </Link>
               </li>
             ))}
-            {isAuthenticated && (
+            {isHomePage && !isAuthenticated && !isAdminPage && (
+              <>
+                <li>
+                  <Link
+                    to="/donor-login"
+                    className="bg-white text-red-600 px-4 py-2 rounded-lg hover:bg-yellow-300 hover:text-red-800 transition duration-300"
+                  >
+                    Donor Login
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/admin/login"
+                    className="bg-white text-red-600 px-4 py-2 rounded-lg hover:bg-yellow-300 hover:text-red-800 transition duration-300"
+                  >
+                    Admin Login
+                  </Link>
+                </li>
+              </>
+            )}
+            {isAdminPage && (
+              <li>
+                <button
+                  onClick={handleAdminLogout}
+                  className="bg-white text-red-600 px-4 py-2 rounded-lg hover:bg-yellow-300 hover:text-red-800 transition duration-300"
+                >
+                  Admin Logout
+                </button>
+              </li>
+            )}
+            {isAuthenticated && !isAdminPage && !isDonorOrAdminLogin && (
               <li>
                 <button
                   onClick={handleLogout}
@@ -71,7 +118,6 @@ const Navbar = () => {
           </ul>
         </div>
 
-        {/* Mobile Navigation */}
         {isOpen && (
           <ul className="md:hidden space-y-4 pb-4">
             {navLinks.map((link, index) => (
@@ -85,7 +131,42 @@ const Navbar = () => {
                 </Link>
               </li>
             ))}
-            {isAuthenticated && (
+            {isHomePage && !isAuthenticated && !isAdminPage && (
+              <>
+                <li>
+                  <Link
+                    to="/donor-login"
+                    className="block hover:text-yellow-300"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Donor Login
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/admin/login"
+                    className="block hover:text-yellow-300"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Admin Login
+                  </Link>
+                </li>
+              </>
+            )}
+            {isAdminPage && (
+              <li>
+                <button
+                  onClick={() => {
+                    handleAdminLogout();
+                    setIsOpen(false);
+                  }}
+                  className="text-white hover:text-yellow-300 transition duration-300"
+                >
+                  Admin Logout
+                </button>
+              </li>
+            )}
+            {isAuthenticated && !isAdminPage && !isDonorOrAdminLogin && (
               <li>
                 <button
                   onClick={() => {
@@ -106,4 +187,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-  

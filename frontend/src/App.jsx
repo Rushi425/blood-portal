@@ -1,5 +1,6 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import React from "react";
+
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
@@ -13,11 +14,19 @@ import ContactUs from "./pages/ContactUs";
 import SearchBlood from "./pages/SearchBlood";
 import AddBloodBank from "./pages/AddBloodBank";
 import BookAppointment from './components/BookAppointment';
+import AdminLogin from "./pages/AdminLogin";
+import AdminHome from "./pages/AdminHome";
 
 function App() {
+  const location = useLocation();
+
+  const hideNavbarFooterRoutes = ["/donor-login", "/donor-register", "/admin/login"];
+  const shouldShowFooter = !hideNavbarFooterRoutes.includes(location.pathname);
+
   return (
     <>
       <Navbar />
+
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/donor-login" element={<DonorLogin />} />
@@ -30,9 +39,11 @@ function App() {
         <Route path="/find-blood" element={<SearchBlood />} />
         <Route path="/add-bloodbank" element={<AddBloodBank />} />
         <Route path="/book-appointment/:bloodBankId" element={<BookAppointment />} />
-
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/home" element={<AdminHome />} />
       </Routes>
-      <Footer />
+
+      {shouldShowFooter && <Footer />}
     </>
   );
 }
