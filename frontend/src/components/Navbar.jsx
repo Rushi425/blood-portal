@@ -18,9 +18,7 @@ const Navbar = () => {
     navigate('/');
   };
 
-  const isHomePage = location.pathname === "/";
   const isAdminPage = location.pathname === "/admin/home";
-
   const isDonorOrAdminLogin =
     location.pathname === "/donor-login" ||
     location.pathname === "/donor-register" ||
@@ -75,7 +73,7 @@ const Navbar = () => {
                 </Link>
               </li>
             ))}
-            {isHomePage && !isAuthenticated && !isAdminPage && (
+            {!isAuthenticated && !isAdminPage && !isDonorOrAdminLogin && (
               <>
                 <li>
                   <Link
@@ -101,7 +99,7 @@ const Navbar = () => {
                   onClick={handleAdminLogout}
                   className="bg-white text-red-600 px-4 py-2 rounded-lg hover:bg-yellow-300 hover:text-red-800 transition duration-300"
                 >
-                  Admin Logout
+                  Logout
                 </button>
               </li>
             )}
@@ -131,7 +129,7 @@ const Navbar = () => {
                 </Link>
               </li>
             ))}
-            {isHomePage && !isAuthenticated && !isAdminPage && (
+            {!isAuthenticated && !isAdminPage && !isDonorOrAdminLogin && (
               <>
                 <li>
                   <Link
@@ -162,7 +160,7 @@ const Navbar = () => {
                   }}
                   className="text-white hover:text-yellow-300 transition duration-300"
                 >
-                  Admin Logout
+                  Logout
                 </button>
               </li>
             )}

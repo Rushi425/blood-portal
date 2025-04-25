@@ -18,10 +18,7 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminHome from "./pages/AdminHome";
 
 function App() {
-  const location = useLocation();
 
-  const hideNavbarFooterRoutes = ["/donor-login", "/donor-register", "/admin/login"];
-  const shouldShowFooter = !hideNavbarFooterRoutes.includes(location.pathname);
 
   return (
     <>
@@ -43,7 +40,7 @@ function App() {
         <Route path="/admin/home" element={<AdminHome />} />
       </Routes>
 
-      {shouldShowFooter && <Footer />}
+      <Footer />
     </>
   );
 }
