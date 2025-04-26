@@ -6,7 +6,6 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -22,13 +21,7 @@ const Login = () => {
       const success = await login({ email, password });
 
       if (success) {
-        // Optionally store email in localStorage if rememberMe is checked
-        if (rememberMe) {
-          localStorage.setItem("rememberedEmail", email);
-        } else {
-          localStorage.removeItem("rememberedEmail");
-        }
-
+        
         navigate("/donor-home");
       } else {
         setError("Invalid email or password.");
@@ -41,14 +34,7 @@ const Login = () => {
     }
   };
 
-  // Load remembered email if available
-  React.useEffect(() => {
-    const savedEmail = localStorage.getItem("rememberedEmail");
-    if (savedEmail) {
-      setEmail(savedEmail);
-      setRememberMe(true);
-    }
-  }, []);
+ 
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -90,15 +76,7 @@ const Login = () => {
         </div>
 
         <div className="flex items-center justify-between mb-4">
-          <label className="flex items-center text-sm">
-            <input
-              type="checkbox"
-              checked={rememberMe}
-              onChange={() => setRememberMe((prev) => !prev)}
-              className="mr-2"
-            />
-            Remember Me
-          </label>
+        
           <Link to="/forgot-password" className="text-sm text-red-600 hover:underline">
             Forgot Password?
           </Link>
