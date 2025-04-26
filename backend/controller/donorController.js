@@ -1,4 +1,5 @@
 const User = require('../model/userModel');
+const nodemailer = require("nodemailer");
 
 // Get donor profile (protected)
 const getDonorProfile = async (req, res) => {
@@ -79,11 +80,60 @@ const searchDonors = async (req, res) => {
   }
 };
 
+// Send emails to donors
+const sendEmailsToDonors = async (req, res) => {
+  const { seekerDetails, donors } = req.body;
+
+  if (!seekerDetails || !donors || donors.length === 0) {
+    return res.status(400).json({ error: "Invalid data provided" });
+  }
+
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS // Replace with your email password
+    },
+  });
+
+  const emailPromises = donors.map((donor) => {
+    const mailOptions = {
+      from: "your-email@gmail.com",
+      to: donor.email,
+      subject: "Urgent Blood Donation Request",
+      text: `
+        Dear ${donor.fullName},
+
+        A blood seeker has requested blood in your area. Here are the details:
+
+        - Phone: ${seekerDetails.phone}
+        - Message: ${seekerDetails.message}
+        - Area: ${seekerDetails.area}
+        - Blood Group: ${donor.bloodGroup}
+
+        Please contact the seeker if you are available to donate.
+
+        Thank you for your support!
+      `,
+    };
+
+    return transporter.sendMail(mailOptions);
+  });
+
+  try {
+    await Promise.all(emailPromises);
+    res.status(200).json({ message: "Emails sent successfully" });
+  } catch (error) {
+    console.error("Error sending emails:", error);
+    res.status(500).json({ error: "Failed to send emails" });
+  }
+};
 
 
 module.exports = {
   getDonorProfile,
   updateDonorProfile,
   searchDonors,
+  sendEmailsToDonors,
   toggleAvailability
 };
