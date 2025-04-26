@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
-
+import {API} from "../api/axios.js";
 const bloodGroups = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
 
 const SearchBlood = () => {
@@ -20,10 +19,10 @@ const SearchBlood = () => {
     setError("");
 
     try {
-      const response = await axios.get(
-        `/api/donor/search?bloodGroup=${bloodGroup}&location=${location}`,
-        { withCredentials: true }
-      );
+      const response = await API.get('/search', {
+        params: { bloodGroup, location },
+        withCredentials: true
+      });
       setResults(response.data);
     } catch (error) {
       setError("Failed to fetch donors. Please try again.");
@@ -56,7 +55,7 @@ const SearchBlood = () => {
           value={location}
           onChange={(e) => setLocation(e.target.value)}
           className="w-full p-2 border rounded focus:outline-none"
-          placeholder="City or area"
+          placeholder="City"
         />
         <button
           onClick={handleSearch}
@@ -67,24 +66,46 @@ const SearchBlood = () => {
         {error && <p className="text-red-600 mt-2">{error}</p>}
       </div>
 
-      <div className="mt-8 w-full max-w-md">
-        <h2 className="text-2xl font-semibold text-gray-700 text-center mb-4">Results</h2>
-        {results.length > 0 ? (
-          <div className="space-y-4">
-            {results.map((donor, index) => (
-              <div key={index} className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center">
-                <div>
-                  <h3 className="font-bold text-red-600">{donor.name}</h3>
-                  <p className="text-gray-700">{donor.bloodGroup} - {donor.city}</p>
-                  <p className="text-sm text-gray-500">📞 {donor.contact}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-gray-600 text-center">{loading ? "Loading..." : "No donors found."}</p>
-        )}
-      </div>
+      <div className="mt-8 w-full max-w-5xl">
+      <h2 className="text-2xl font-semibold text-gray-700 text-center mb-4">Results</h2>
+
+      {results.length > 0 ? (
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white rounded-lg shadow-md">
+            <thead className="bg-red-600 text-white">
+              <tr>
+                <th className="py-2 px-4">Name</th>
+                <th className="py-2 px-4">Blood Group</th>
+                <th className="py-2 px-4">City</th>
+                <th className="py-2 px-4">Phone</th>
+                <th className="py-2 px-4">Email</th>
+              </tr>
+            </thead>
+            <tbody>
+              {results.map((donor, index) => (
+                <tr
+                  key={index}
+                  className="border-b hover:bg-gray-100 transition"
+                >
+                  <td className="py-2 px-4 text-center font-semibold text-gray-700">{donor.fullName}</td>
+                  <td className="py-2 px-4 text-center text-red-600">{donor.bloodGroup}</td>
+                  <td className="py-2 px-4 text-center">{donor.city}</td>
+                  <td className="py-2 px-4 text-center">
+                    <a href={`tel:${donor.phone}`} className="text-blue-600 hover:underline">
+                      {donor.phone}
+                    </a>
+                  </td>
+                  <td className="py-2 px-4 text-center">{donor.email}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+  ) : (
+    <p className="text-gray-600 text-center">{loading ? "Loading..." : "No donors found."}</p>
+  )}
+</div>
+
     </div>
   );
 };
