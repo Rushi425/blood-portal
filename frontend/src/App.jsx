@@ -5,7 +5,6 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import DonorHome from "./pages/DonorHome";
-import DonorProfile from "./pages/DonorProfile";
 import DonorLogin from "./pages/DonorLogin";
 import DonorRegister from "./pages/DonorRegister";
 import BloodBanks from "./pages/BloodBanks";
@@ -28,7 +27,6 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/donor-login" element={<DonorLogin />} />
         <Route path="/donor-register" element={<DonorRegister />} />
-        <Route path="/donor-profile" element={<DonorProfile />} />
         <Route path="/donor-home" element={<DonorHome />} />
         <Route path="/blood-banks" element={<BloodBanks />} />
         <Route path="/about-us" element={<AboutUs />} />
