@@ -14,11 +14,29 @@ exports.adminLogin = async (req, res) => {
     }
 
     const token = jwt.sign({ id: admin._id, role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.status(200).json({ token });
+    
+    res.cookie('token', token, { 
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+      maxAge: 3600000 // 1 hour
+    });
+    
+    res.status(200).json({ message: 'Login successful' });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error });
   }
 };
+
+// Admin Logout
+// exports.adminLogout = (req, res) => {
+//   res.clearCookie('token', { path: '/' });
+//   res.status(200).json({ message: 'Logout successful' });
+// };
+exports.adminLogout = (req, res) => {
+  res.clearCookie('token');
+  res.status(200).json({ message: 'Logout successful' });
+};
+
 
 // Fetch Registered Users
 exports.getRegisteredUsers = async (req, res) => {

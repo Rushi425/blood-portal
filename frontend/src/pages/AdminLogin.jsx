@@ -14,21 +14,18 @@ const AdminLogin = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError(null); // Clear previous errors
+    setError(null);
 
     try {
       const response = await API.post('/admin-login', { email, password });
-      // Assuming the token is directly in response.data.token
-      if (response.data?.token) {
-        localStorage.setItem('adminToken', response.data.token);
+      // The backend now sets an HTTP-only cookie, so no need to handle token on the frontend here.
+      if (response.status === 200) { 
         navigate('/admin/home'); // Navigate on successful login
       } else {
-         // Handle cases where login is "successful" (status 2xx) but no token is returned
-         throw new Error("Login successful but no token received.");
+         throw new Error("Login failed with unexpected status.");
       }
     } catch (err) {
       console.error("Login failed:", err);
-      // Extract error message more reliably
       let errorMessage = "Login failed. Please check your credentials or server status.";
       if (err.response?.data?.message) {
         errorMessage = err.response.data.message;

@@ -1,64 +1,71 @@
 import React, { useEffect, useState } from 'react';
-import { API } from '../api/axios/'; // Ensure this path is correct
+import { API } from '../api/axios/';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
   Users,
-  Building2, // Changed from Building for variety
+  Building2,
   CheckCircle,
   XCircle,
   Loader2,
   AlertCircle,
-  ShieldCheck, // Example Icon for Admin
+  ShieldCheck,
   Mail,
   Phone,
   MapPin,
   Clock,
-  Tag, // Icon for Blood Group
+  Tag,
+  LogOut
 } from 'lucide-react';
 
 const AdminHome = () => {
   const [users, setUsers] = useState([]);
   const [bloodBanks, setBloodBanks] = useState([]);
-  const [activeTab, setActiveTab] = useState('users'); // 'users' or 'bloodbanks'
-  const [loading, setLoading] = useState(true); // Start loading initially
+  const [activeTab, setActiveTab] = useState('users');
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      setError(null); // Reset error on new fetch attempt
+      setError(null);
       try {
-        // Retrieve token securely (consider alternatives to localStorage if needed)
-        const token = localStorage.getItem('adminToken');
-        if (!token) {
-          throw new Error("Admin token not found. Please log in.");
-        }
-        const config = { headers: { Authorization: `Bearer ${token}` } };
-
-        // Fetch data in parallel for efficiency
         const [usersResponse, bloodBanksResponse] = await Promise.all([
-          API.get('/admin-users', config),
-          API.get('/admin-blood-banks', config)
+          API.get('/admin-users'),
+          API.get('/admin-blood-banks')
         ]);
 
-        // Basic validation of responses (check if data is array)
         setUsers(Array.isArray(usersResponse?.data) ? usersResponse.data : []);
         setBloodBanks(Array.isArray(bloodBanksResponse?.data) ? bloodBanksResponse.data : []);
 
       } catch (err) {
         console.error("Error fetching admin data:", err);
         setError(err.response?.data?.message || err.message || "Failed to fetch data. Please check your connection or login status.");
-        setUsers([]); // Clear data on error
+        setUsers([]);
         setBloodBanks([]);
+        if (err.response?.status === 401 || err.response?.status === 403) {
+          navigate('/admin/login');
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, []); // Dependency array is empty, runs once on mount
+  }, [navigate]);
 
-  // Framer Motion Variants
+  const handleLogout = async () => {
+    try {
+      await API.post('/admin-logout');
+      navigate('/admin/login');
+    } catch (err) {
+      console.error("Logout failed:", err);
+      setError("Logout failed. Please try again.");
+      navigate('/admin/login');
+    }
+  };
+
   const containerVariants = {
     hidden: { opacity: 0, y: 30 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
@@ -72,11 +79,11 @@ const AdminHome = () => {
 
   const rowVariants = {
     hidden: { opacity: 0, x: -20 },
-    visible: i => ({ // Custom prop 'i' for staggering
+    visible: i => ({
       opacity: 1,
       x: 0,
       transition: {
-        delay: i * 0.03, // Stagger delay
+        delay: i * 0.03,
         duration: 0.3,
       },
     }),
@@ -88,14 +95,14 @@ const AdminHome = () => {
   ];
 
   const renderAvailability = (isAvailable) => {
-      if (isAvailable === true) { // Explicit check for boolean true
+      if (isAvailable === true) {
           return (
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                   <CheckCircle size={14} className="mr-1" />
                   Available
               </span>
           );
-      } else if (isAvailable === false) { // Explicit check for boolean false
+      } else if (isAvailable === false) {
           return (
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                   <XCircle size={14} className="mr-1" />
@@ -103,7 +110,6 @@ const AdminHome = () => {
               </span>
           );
       } else {
-           // Handle undefined, null or other values
            return <span className="text-gray-500 text-xs">N/A</span>;
       }
   };
@@ -126,9 +132,17 @@ const AdminHome = () => {
             >
                 Admin Dashboard
             </motion.h1>
-             <ShieldCheck className="text-red-500 h-8 w-8 hidden sm:block" /> {/* Optional Admin Icon */}
+             <div className="flex items-center space-x-4">
+                <ShieldCheck className="text-red-500 h-8 w-8 hidden sm:block" />
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center px-4 py-2 bg-red-600 text-white rounded-md shadow-md hover:bg-red-700 transition-colors duration-200"
+                >
+                  <LogOut className="mr-2 h-5 w-5" />
+                  Logout
+                </button>
+             </div>
         </div>
-
 
         {/* Loading State */}
         {loading && (
@@ -165,7 +179,7 @@ const AdminHome = () => {
                     {activeTab === tab.id && (
                       <motion.div
                         className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-600"
-                        layoutId="underline" // Animate the underline
+                        layoutId="underline"
                         initial={false}
                         transition={{ type: "spring", stiffness: 300, damping: 25 }}
                       />
@@ -203,7 +217,7 @@ const AdminHome = () => {
                       {users.length > 0 ? users.map((user, index) => (
                         <motion.tr
                            key={user._id}
-                           custom={index} // Pass index for stagger delay
+                           custom={index}
                            variants={rowVariants}
                            initial="hidden"
                            animate="visible"
@@ -254,14 +268,13 @@ const AdminHome = () => {
                       {bloodBanks.length > 0 ? bloodBanks.map((bank, index) => (
                          <motion.tr
                             key={bank._id}
-                            custom={index} // Pass index for stagger delay
+                            custom={index}
                             variants={rowVariants}
                             initial="hidden"
                             animate="visible"
                             className="hover:bg-gray-50 transition-colors"
                         >
                           <td className="py-3 px-4 text-sm text-gray-700 whitespace-nowrap">{bank.name || '-'}</td>
-                          {/* Using optional chaining ?. and nullish coalescing ?? for nested properties */}
                           <td className="py-3 px-4 text-sm text-gray-700 whitespace-nowrap">{bank.location?.address ?? '-'}</td>
                           <td className="py-3 px-4 text-sm text-gray-700 whitespace-nowrap">{bank.location?.city ?? '-'}</td>
                           <td className="py-3 px-4 text-sm text-gray-700 whitespace-nowrap">{bank.location?.state ?? '-'}</td>
