@@ -15,7 +15,8 @@ import {
   MapPin,
   Clock,
   Tag,
-  LogOut
+  LogOut,
+  Trash2
 } from 'lucide-react';
 
 const AdminHome = () => {
@@ -24,6 +25,7 @@ const AdminHome = () => {
   const [activeTab, setActiveTab] = useState('users');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null); // { id: null, type: null }
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -64,6 +66,38 @@ const AdminHome = () => {
       setError("Logout failed. Please try again.");
       navigate('/admin/login');
     }
+  };
+
+  const handleDeleteUser = async () => {
+    try {
+      await API.delete(`/delete-user/${confirmDelete.id}`);
+      setUsers(users.filter(user => user._id !== confirmDelete.id));
+      setConfirmDelete(null); // Close modal
+    } catch (err) {
+      console.error("User deletion failed:", err);
+      setError(err.response?.data?.message || "Failed to delete user.");
+      setConfirmDelete(null); // Close modal on error as well
+    }
+  };
+
+  const handleDeleteBloodBank = async () => {
+    try {
+      await API.delete(`/delete-bloodbank/${confirmDelete.id}`);
+      setBloodBanks(bloodBanks.filter(bloodBank => bloodBank._id !== confirmDelete.id));
+      setConfirmDelete(null); // Close modal
+    } catch (err) {
+      console.error("Blood bank deletion failed:", err);
+      setError(err.response?.data?.message || "Failed to delete blood bank.");
+      setConfirmDelete(null); // Close modal on error as well
+    }
+  };
+
+  const handleConfirmDelete = (id, type) => {
+    setConfirmDelete({ id, type });
+  };
+
+  const handleCancelDelete = () => {
+    setConfirmDelete(null);
   };
 
   const containerVariants = {
@@ -211,6 +245,7 @@ const AdminHome = () => {
                         <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider"><MapPin size={14} className="inline mr-1"/>City</th>
                         <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider"><MapPin size={14} className="inline mr-1"/>State</th>
                         <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">Availability</th>
+                        <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
@@ -230,10 +265,19 @@ const AdminHome = () => {
                           <td className="py-3 px-4 text-sm text-gray-700 whitespace-nowrap">{user.city || '-'}</td>
                           <td className="py-3 px-4 text-sm text-gray-700 whitespace-nowrap">{user.state || '-'}</td>
                           <td className="py-3 px-4 text-sm whitespace-nowrap">{renderAvailability(user.availability)}</td>
+                          <td className="py-3 px-4 text-sm whitespace-nowrap">
+                            <button 
+                              onClick={() => handleConfirmDelete(user._id, 'user')}
+                              className="text-red-600 hover:text-red-800 transition-colors duration-200"
+                              title="Delete User"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </td>
                         </motion.tr>
                       )) : (
                         <tr>
-                          <td colSpan="7" className="text-center py-4 text-gray-500">No users found.</td>
+                          <td colSpan="8" className="text-center py-4 text-gray-500">No users found.</td>
                         </tr>
                       )}
                     </tbody>
@@ -262,6 +306,7 @@ const AdminHome = () => {
                         <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider"><Phone size={14} className="inline mr-1"/>Phone</th>
                         <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider"><Mail size={14} className="inline mr-1"/>Email</th>
                         <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider"><Clock size={14} className="inline mr-1"/>Operating Hours</th>
+                        <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
@@ -286,6 +331,15 @@ const AdminHome = () => {
                               ? `${bank.operatingHours.open} - ${bank.operatingHours.close}`
                               : '-'}
                           </td>
+                          <td className="py-3 px-4 text-sm whitespace-nowrap">
+                            <button 
+                              onClick={() => handleConfirmDelete(bank._id, 'bloodBank')}
+                              className="text-red-600 hover:text-red-800 transition-colors duration-200"
+                              title="Delete Blood Bank"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </td>
                         </motion.tr>
                       )) : (
                          <tr>
@@ -300,6 +354,44 @@ const AdminHome = () => {
           </>
         )}
       </motion.div>
+
+      {/* Confirmation Modal */}
+      <AnimatePresence>
+        {confirmDelete && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50"
+          >
+            <motion.div
+              initial={{ y: -50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 50, opacity: 0 }}
+              className="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm transform transition-all"
+            >
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Confirm Deletion</h3>
+              <p className="text-sm text-gray-600 mb-6">
+                Are you sure you want to delete this {confirmDelete.type === 'user' ? 'user' : 'blood bank'}? This action cannot be undone.
+              </p>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={handleCancelDelete}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDelete.type === 'user' ? handleDeleteUser : handleDeleteBloodBank}
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors"
+                >
+                  Yes, Delete
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
