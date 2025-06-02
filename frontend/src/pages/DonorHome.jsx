@@ -211,6 +211,29 @@ const DonorHome = () => {
                   <p className="flex items-center space-x-2"><span className="font-medium w-24">City:</span> <span>{profile.city}</span></p>
                   <p className="flex items-center space-x-2"><span className="font-medium w-24">State:</span> <span>{profile.state}</span></p>
                   <p className="flex items-center space-x-2"><span className="font-medium w-24">Pincode:</span> <span>{profile.pincode}</span></p>
+                  <div className="col-span-1 md:col-span-2 flex items-center justify-between bg-gray-100 p-4 rounded-lg shadow">
+                  
+                  <div className="flex items-center space-x-3">
+                    <HeartPulse className="text-red-600" />
+                    <span className="text-lg font-semibold">
+                      Availability:{" "}
+                      <span className={profile.availability ? "text-green-600" : "text-red-600"}>
+                        {profile.availability ? "Available" : "Not Available"}
+                      </span>
+                    </span>
+                  </div>
+                  <button
+                    onClick={toggleAvailability}
+                    className={`px-5 py-2 rounded-md font-semibold transition-colors duration-200 ${
+                      profile.availability
+                        ? "bg-red-600 text-white hover:bg-red-700"
+                        : "bg-green-600 text-white hover:bg-green-700"
+                    }`}
+                  >
+                    {profile.availability ? "Set as Unavailable" : "Set as Available"}
+                  </button>
+                </div>
+
                 </motion.div>
               </motion.div>
             )}
