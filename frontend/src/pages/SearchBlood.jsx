@@ -14,6 +14,8 @@ import {
   AlertCircle,
   Loader2,
   CheckCircle2,
+  Shield,
+  AlertTriangle,
 } from "lucide-react";
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
@@ -25,6 +27,8 @@ const SearchBlood = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [emailStatus, setEmailStatus] = useState("idle"); // idle, processing, success, error
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
   const [seekerDetails, setSeekerDetails] = useState({
     phone: "",
     message: "",
@@ -36,6 +40,10 @@ const SearchBlood = () => {
     setResults([]);
     if (!bloodGroup) {
       setError("Please select a blood group");
+      return;
+    }
+    if (!termsAccepted) {
+      setError("Please accept the terms and conditions first");
       return;
     }
     setLoading(true);
@@ -112,6 +120,70 @@ const SearchBlood = () => {
           >
             <AlertCircle size={18} /> {error}
           </motion.p>
+        )}
+      </AnimatePresence>
+
+      {/* Terms and Conditions Modal */}
+      <AnimatePresence>
+        {showTerms && (
+          <motion.div
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="bg-white rounded-xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+            >
+              <h2 className="text-2xl font-bold text-red-700 mb-4">Terms and Conditions</h2>
+              <div className="space-y-4 text-gray-700">
+                <p className="font-semibold">Important Health and Safety Terms:</p>
+                <ul className="list-disc pl-5 space-y-2">
+                  <li>I understand that blood donation is a voluntary act and donors are not obligated to respond to requests.</li>
+                  <li>I confirm that the blood requirement is genuine and for medical purposes only.</li>
+                  <li>I will not misuse donor contact information or share it with unauthorized parties.</li>
+                  <li>I understand that donors may not be available immediately and may need time to respond.</li>
+                  <li>I will respect donor privacy and maintain confidentiality of all communications.</li>
+                  <li>I will not use this service for commercial purposes or blood trading.</li>
+                  <li>I understand that this platform is for emergency blood requirements only.</li>
+                </ul>
+                <div className="flex items-center space-x-2 mt-4">
+                  <input
+                    type="checkbox"
+                    id="acceptTerms"
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor="acceptTerms" className="text-sm text-gray-700">
+                    I have read and agree to these terms and conditions
+                  </label>
+                </div>
+              </div>
+              <div className="mt-6 flex justify-end space-x-4">
+                <button
+                  onClick={() => setShowTerms(false)}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => {
+                    if (termsAccepted) {
+                      setShowTerms(false);
+                    }
+                  }}
+                  disabled={!termsAccepted}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                >
+                  Accept & Continue
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -202,9 +274,28 @@ const SearchBlood = () => {
               />
             </div>
           </div>
+          <div className="flex items-center space-x-2 mb-4">
+            <input
+              type="checkbox"
+              id="termsCheckbox"
+              checked={termsAccepted}
+              onChange={(e) => setTermsAccepted(e.target.checked)}
+              className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+            />
+            <label htmlFor="termsCheckbox" className="text-sm text-gray-700">
+              I accept the{" "}
+              <button
+                type="button"
+                onClick={() => setShowTerms(true)}
+                className="text-red-600 hover:text-red-700 underline"
+              >
+                terms and conditions
+              </button>
+            </label>
+          </div>
           <button
             onClick={handleSearch}
-            disabled={loading}
+            disabled={loading || !termsAccepted}
             className="w-full bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 transition disabled:opacity-50"
           >
             {loading ? (
