@@ -6,6 +6,7 @@ require('dotenv').config();
 
 const app = express();
 const connectDB = require('./config/db.js');
+const { updateAppointmentStatus } = require('./utils/appointmentStatus');
 
 // Middleware
 app.use(cors({ origin: 'http://localhost:5173', credentials: true })); 
@@ -30,6 +31,15 @@ app.use((err, req, res, next) => {
 
 const port = process.env.PORT || 3000;
 const server = http.createServer(app);
+
+// Check appointment statuses every 5 minutes
+setInterval(async () => {
+  try {
+    await updateAppointmentStatus();
+  } catch (error) {
+    console.error('Error in appointment status check:', error);
+  }
+}, 5 * 60 * 1000); // Run every 5 minutes
 
 connectDB().then(() => {
     server.listen(port, () => {

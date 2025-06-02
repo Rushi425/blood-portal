@@ -16,12 +16,14 @@ import {
   Clock,
   Tag,
   LogOut,
-  Trash2
+  Trash2,
+  Calendar
 } from 'lucide-react';
 
 const AdminHome = () => {
   const [users, setUsers] = useState([]);
   const [bloodBanks, setBloodBanks] = useState([]);
+  const [appointments, setAppointments] = useState({ pending: [], completed: [] });
   const [activeTab, setActiveTab] = useState('users');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -33,19 +35,26 @@ const AdminHome = () => {
       setLoading(true);
       setError(null);
       try {
-        const [usersResponse, bloodBanksResponse] = await Promise.all([
+        const [usersResponse, bloodBanksResponse, pendingAppointmentsResponse, completedAppointmentsResponse] = await Promise.all([
           API.get('/admin-users'),
-          API.get('/admin-blood-banks')
+          API.get('/admin-blood-banks'),
+          API.get('/admin-appointments/pending'),
+          API.get('/admin-appointments/completed')
         ]);
 
         setUsers(Array.isArray(usersResponse?.data) ? usersResponse.data : []);
         setBloodBanks(Array.isArray(bloodBanksResponse?.data) ? bloodBanksResponse.data : []);
+        setAppointments({
+          pending: Array.isArray(pendingAppointmentsResponse?.data) ? pendingAppointmentsResponse.data : [],
+          completed: Array.isArray(completedAppointmentsResponse?.data) ? completedAppointmentsResponse.data : []
+        });
 
       } catch (err) {
         console.error("Error fetching admin data:", err);
         setError(err.response?.data?.message || err.message || "Failed to fetch data. Please check your connection or login status.");
         setUsers([]);
         setBloodBanks([]);
+        setAppointments({ pending: [], completed: [] });
         if (err.response?.status === 401 || err.response?.status === 403) {
           navigate('/admin/login');
         }
@@ -126,6 +135,7 @@ const AdminHome = () => {
   const tabs = [
     { id: 'users', label: 'Manage Users', icon: Users },
     { id: 'bloodbanks', label: 'Manage Blood Banks', icon: Building2 },
+    { id: 'appointments', label: 'Manage Appointments', icon: Calendar },
   ];
 
   const renderAvailability = (isAvailable) => {
@@ -348,6 +358,108 @@ const AdminHome = () => {
                       )}
                     </tbody>
                   </table>
+                </motion.div>
+              )}
+
+              {/* Appointments Table */}
+              {activeTab === 'appointments' && (
+                <motion.div
+                  key="appointments-table"
+                  variants={tableContainerVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="space-y-6"
+                >
+                  {/* Pending Appointments */}
+                  <div className="overflow-x-auto shadow-md rounded-lg border border-gray-200">
+                    <div className="bg-yellow-100 px-4 py-2 border-b border-yellow-200">
+                      <h3 className="text-yellow-800 font-semibold">Pending Appointments</h3>
+                    </div>
+                    <table className="min-w-full bg-white divide-y divide-gray-200">
+                      <thead className="bg-yellow-600 text-white">
+                        <tr>
+                          <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">User Name</th>
+                          <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">Blood Bank</th>
+                          <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">Date</th>
+                          <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">Time</th>
+                          <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {appointments.pending.map((appointment, index) => (
+                          <motion.tr
+                            key={appointment._id}
+                            variants={rowVariants}
+                            initial="hidden"
+                            animate="visible"
+                            custom={index}
+                            className="hover:bg-gray-50"
+                          >
+                            <td className="py-3 px-4 text-sm text-gray-900">{appointment.userName}</td>
+                            <td className="py-3 px-4 text-sm text-gray-900">{appointment.bloodBankName}</td>
+                            <td className="py-3 px-4 text-sm text-gray-900">{appointment.date}</td>
+                            <td className="py-3 px-4 text-sm text-gray-900">{appointment.time}</td>
+                            <td className="py-3 px-4 text-sm">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                Pending
+                              </span>
+                            </td>
+                          </motion.tr>
+                        ))}
+                        {appointments.pending.length === 0 && (
+                          <tr>
+                            <td colSpan="5" className="py-4 text-center text-gray-500">No pending appointments</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Completed Appointments */}
+                  <div className="overflow-x-auto shadow-md rounded-lg border border-gray-200">
+                    <div className="bg-green-100 px-4 py-2 border-b border-green-200">
+                      <h3 className="text-green-800 font-semibold">Completed Appointments</h3>
+                    </div>
+                    <table className="min-w-full bg-white divide-y divide-gray-200">
+                      <thead className="bg-green-600 text-white">
+                        <tr>
+                          <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">User Name</th>
+                          <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">Blood Bank</th>
+                          <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">Date</th>
+                          <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">Time</th>
+                          <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {appointments.completed.map((appointment, index) => (
+                          <motion.tr
+                            key={appointment._id}
+                            variants={rowVariants}
+                            initial="hidden"
+                            animate="visible"
+                            custom={index}
+                            className="hover:bg-gray-50"
+                          >
+                            <td className="py-3 px-4 text-sm text-gray-900">{appointment.userName}</td>
+                            <td className="py-3 px-4 text-sm text-gray-900">{appointment.bloodBankName}</td>
+                            <td className="py-3 px-4 text-sm text-gray-900">{appointment.date}</td>
+                            <td className="py-3 px-4 text-sm text-gray-900">{appointment.time}</td>
+                            <td className="py-3 px-4 text-sm">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                Completed
+                              </span>
+                            </td>
+                          </motion.tr>
+                        ))}
+                        {appointments.completed.length === 0 && (
+                          <tr>
+                            <td colSpan="5" className="py-4 text-center text-gray-500">No completed appointments</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>

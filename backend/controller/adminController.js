@@ -2,6 +2,7 @@ const Admin = require('../model/adminModel');
 const jwt = require('jsonwebtoken');
 const User = require('../model/userModel'); // Assuming you have a User model
 const BloodBank = require('../model/bloodBankModel'); // Assuming you have a BloodBank model
+const Appointment = require('../model/appointmentModel');
 
 // Admin Login
 exports.adminLogin = async (req, res) => {
@@ -81,6 +82,22 @@ exports.deleteBloodBank = async (req, res) => {
       return res.status(404).json({ message: 'Blood bank not found' });
     }
     res.status(200).json({ message: 'Blood bank deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+// Fetch appointments by status
+exports.getAppointmentsByStatus = async (req, res) => {
+  try {
+    const { status } = req.params;
+    if (!['pending', 'completed'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status. Must be either pending or completed' });
+    }
+    
+    const appointments = await Appointment.find({ status })
+      .sort({ createdAt: -1 }); // Sort by newest first
+    res.status(200).json(appointments);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error });
   }
