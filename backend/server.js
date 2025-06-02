@@ -22,6 +22,12 @@ app.use('/api/v1', donorRoutes);
 app.use('/api/v1', statsRoutes); 
 app.use('/api/v1', adminRoutes); 
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Something went wrong!' });
+});
+
 const port = process.env.PORT || 3000;
 const server = http.createServer(app);
 

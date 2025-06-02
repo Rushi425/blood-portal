@@ -20,13 +20,7 @@ const bloodBankSchema = new mongoose.Schema({
     open: { type: String, required: true }, 
     close: { type: String, required: true },
   },
-  appointments: [
-    {
-      userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-      date: { type: Date, required: true },
-      time: { type: String, required: true },
-    },
-  ],
+  
 }, {timestamps: true});
 
 const BloodBank = mongoose.model("BloodBank", bloodBankSchema);

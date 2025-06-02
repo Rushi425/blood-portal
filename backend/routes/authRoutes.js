@@ -1,7 +1,6 @@
 const express = require('express');
 const { loginUser, logoutUser, registerUser } = require('../controller/userController.js');
 const { getBloodBanks, addBloodBank } = require('../controller/bloodBankController.js');
-const { getBloodGroupStatistics } = require('../controller/getBloodStatsController.js');
 const { sendContactEmail } = require('../controller/contactController.js');
 
 const router = express.Router();
@@ -20,6 +19,6 @@ router.get('/bloodbanks', getBloodBanks);
 router.post('/contact', sendContactEmail);
 
 // Statistics route
-router.get('/statistics/blood-groups', getBloodGroupStatistics);
+// router.get('/statistics/blood-groups', getBloodGroupStatistics);
 
 module.exports = router;
