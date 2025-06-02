@@ -76,7 +76,7 @@ const SearchBlood = () => {
     }
     try {
       const { data } = await API.post(
-        "/send-email",
+        "/send-emails",
         { seekerDetails, donors: results },
         { withCredentials: true }
       );
