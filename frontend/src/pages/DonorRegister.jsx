@@ -66,6 +66,13 @@ const DonorRegister = () => {
       return;
     }
 
+    // Password length validation
+    if (formData.password.length < 6) {
+      setError("Password must be at least 6 characters long.");
+      setLoading(false);
+      return;
+    }
+
     try {
       const regRes = await API.post("/register", formData, { withCredentials: true });
 

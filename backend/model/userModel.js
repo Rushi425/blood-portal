@@ -12,7 +12,12 @@ const userSchema = new mongoose.Schema({
   state: { type: String, required: true },
   city: { type: String, required: true },
   pincode: { type: String, required: true },
-  password: { type: String, required: true, select: false },
+  password: { 
+    type: String, 
+    required: true, 
+    select: false,
+    minlength: [6, 'Password must be at least 6 characters long']
+  },
 }, { timestamps: true });
 
 userSchema.pre('save', async function (next) {
