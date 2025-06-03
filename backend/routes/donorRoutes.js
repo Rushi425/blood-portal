@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.get('/profile', verifyToken, getDonorProfile);
 router.put('/profile', verifyToken, updateDonorProfile);
-router.get('/search', verifyToken, searchDonors);
+router.get('/search', searchDonors);
 router.post('/toggle-availability', verifyToken, toggleAvailability);
 router.post('/send-emails', verifyToken, sendEmailsToDonors);
 

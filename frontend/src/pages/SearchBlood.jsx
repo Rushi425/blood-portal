@@ -49,8 +49,7 @@ const SearchBlood = () => {
     setLoading(true);
     try {
       const { data } = await API.get("/search", {
-        params: { bloodGroup, location },
-        withCredentials: true,
+        params: { bloodGroup, location }
       });
       setResults(data);
     } catch {
